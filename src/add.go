@@ -3,15 +3,17 @@ package ternary
 
 import (
   "strings"
-  "fmt"
+  // "fmt"
 )
 
+type rods [64]rune
+
 type point struct {
-  x [64]rune
-  y [64]rune
+  x rods
+  y rods
 }
 
-func intoTwo(x [64]rune) (a, b [64]rune) {
+func intoTwo(x rods) (a, b rods) {
   dict := map[rune] ([2]rune) {
     '1': [2]rune{'1', '5'},
     '2': [2]rune{'9', '9'},
@@ -33,7 +35,7 @@ func intoTwo(x [64]rune) (a, b [64]rune) {
 func readArray(x string) point {
   x = strings.Trim(x, " ")
   xs := strings.Split(x, ".")
-  arr := [64]rune{}
+  arr := rods{}
   for index := range(arr) {
     arr[index] = '5'
   }
@@ -60,7 +62,7 @@ func readArray(x string) point {
   return arr2
 }
 
-func interAdd(a, b [64]rune) (c, d [64]rune) {
+func interAdd(a, b rods) (c, d rods) {
   for i := 0; i < 64; i++ {
     x1 := a[i]
     x2 := b[i]
@@ -96,15 +98,88 @@ func interAdd(a, b [64]rune) (c, d [64]rune) {
   return
 }
 
+func isZero(a rods) (right bool) {
+  right = true
+  for _, v := range(a) {
+    if v != '5' {
+      right = false
+    }
+  }
+  return
+}
+
+func addRods(a, b rods) rods {
+
+  c, d := a, b
+  // fmt.Println(nice(string(c[:])))
+  // fmt.Println(nice(string(d[:])))
+  counter := 0
+  for {
+    c, d = interAdd(c, d)
+    // fmt.Println(nice(string(c[:])))
+    // fmt.Println(nice(string(d[:])))
+    // fmt.Println("end")
+    if isZero(d) {
+      break
+    }
+    counter ++
+    if counter > 20 {
+      break
+    }
+
+  }
+  return c
+}
+
+func nice(a string) (b string) {
+  b = strings.Replace(a, "5", "-", -1)
+  return
+}
+
 func addPoint(a, b point) (c point) {
-  var next rune
-  var curr rune
+  c.x = addRods(a.x, b.x)
+  c.y = addRods(a.y, b.y)
+  return
+}
+
+func intoOne(a point) (b string) {
+  var c rods
+  for i, _ := range(c) {
+    x1 := a.x[i]
+    x2 := a.y[i]
+    switch {
+      case x1 == '1' && x2 == '1':
+        c[i] = '8'
+      case x1 == '1' && x2 == '5':
+        c[i] = '1'
+      case x1 == '1' && x2 == '9':
+        c[i] = '6'
+      case x1 == '5' && x2 == '1':
+        c[i] = '7'
+      case x1 == '5' && x2 == '5':
+        c[i] = '5'
+      case x1 == '5' && x2 == '9':
+        c[i] = '3'
+      case x1 == '9' && x2 == '1':
+        c[i] = '4'
+      case x1 == '9' && x2 == '5':
+        c[i] = '9'
+      case x1 == '9' && x2 == '9':
+        c[i] = '2'
+    }
+  }
+  b = string(c[:])
   return
 }
 
 func Add(a string, b string) (c string) {
   pa := readArray(a)
   pb := readArray(b)
-  addPoint(pa, pb)
+  pc := addPoint(pa, pb)
+  res := intoOne(pc)
+  intPart := strings.TrimLeft(res[:32], "5")
+  deciPart := strings.TrimRight(res[32:], "5")
+  x := []string{intPart, deciPart}
+  c = strings.Join(x, ".")
   return
 }
